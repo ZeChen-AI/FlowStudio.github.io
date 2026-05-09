@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="FlowStudio is a cinematic AI production workspace for image generation and editing tasks."
+    />
+    <title>FlowStudio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="FlowStudio navigation">
+      <a class="brand" href="#top" aria-label="FlowStudio home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>FlowStudio</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#studio">Studio</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#result">Result</a>
+      </nav>
+      <a
+        class="repo-link"
+        href="https://github.com/ZeChen-AI/FlowStudio.github.io"
+        target="_blank"
+        rel="noreferrer"
+      >
+        GitHub
+      </a>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <img class="hero-image" src="assets/studio-hero.png" alt="" />
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="eyebrow">AI Film Production Workspace</p>
+          <h1 id="hero-title">FlowStudio</h1>
+          <p class="hero-copy">
+            把项目、镜头提示词、生成任务和 Python AI Runner 收进同一个制片厂工作台。
+          </p>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a class="button button-primary" href="#studio">Open Studio</a>
+            <a class="button button-secondary" href="https://github.com/ZeChen-AI/FlowStudio.github.io" target="_blank" rel="noreferrer">
+              View Repository
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="studio" class="workspace" aria-labelledby="studio-title">
+        <div class="section-heading">
+          <p class="eyebrow">Front End</p>
+          <h2 id="studio-title">Production Desk</h2>
+        </div>
+
+        <div class="studio-shell">
+          <form class="control-panel" aria-label="FlowStudio task composer">
+            <div class="field-grid">
+              <label class="field">
+                <span>Project Name</span>
+                <input type="text" value="Noir City Sequence" aria-label="Project name" />
+              </label>
+
+              <fieldset class="mode-field">
+                <legend>Operation</legend>
+                <div class="segmented-control">
+                  <input type="radio" id="mode-generate" name="operation" checked />
+                  <label for="mode-generate">Generate</label>
+                  <input type="radio" id="mode-edit" name="operation" />
+                  <label for="mode-edit">Edit</label>
+                </div>
+              </fieldset>
+            </div>
+
+            <label class="field prompt-field">
+              <span>Prompt</span>
+              <textarea rows="6" aria-label="Prompt">A rain-soaked cyber-noir street outside a vintage cinema, practical tungsten lights, cinematic framing, 35mm film grain.</textarea>
+            </label>
+
+            <div class="upload-strip">
+              <div>
+                <span class="upload-label">Optional Image</span>
+                <span class="upload-meta">PNG / JPG / WebP</span>
+              </div>
+              <button class="icon-button" type="button" aria-label="Upload image">
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+
+            <div class="panel-footer">
+              <span class="tone-chip">Cinematic</span>
+              <span class="tone-chip">Studio Dark</span>
+              <button class="button button-primary" type="button">Create Task</button>
+            </div>
+          </form>
+
+          <aside class="preview-panel" aria-labelledby="preview-title">
+            <div class="monitor-top">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="monitor-frame">
+              <div class="scanline"></div>
+              <div class="preview-title-block">
+                <p class="eyebrow">Shot Preview</p>
+                <h3 id="preview-title">Noir City Sequence</h3>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="pipeline" class="pipeline-band" aria-labelledby="pipeline-title">
+        <div class="section-heading">
+          <p class="eyebrow">Java Service</p>
+          <h2 id="pipeline-title">Orchestration Flow</h2>
+        </div>
+
+        <div class="pipeline">
+          <article class="pipeline-step">
+            <span class="step-index">01</span>
+            <h3>Controller</h3>
+            <p>Request intake</p>
+          </article>
+          <article class="pipeline-step">
+            <span class="step-index">02</span>
+            <h3>Project</h3>
+            <p>Create project</p>
+          </article>
+          <article class="pipeline-step">
+            <span class="step-index">03</span>
+            <h3>Task</h3>
+            <p>Create task</p>
+          </article>
+          <article class="pipeline-step">
+            <span class="step-index">04</span>
+            <h3>Python Runner</h3>
+            <p>AI module</p>
+          </article>
+          <article class="pipeline-step">
+            <span class="step-index">05</span>
+            <h3>Result</h3>
+            <p>Update task</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="result" class="result-zone" aria-labelledby="result-title">
+        <div class="section-heading">
+          <p class="eyebrow">Task Output</p>
+          <h2 id="result-title">Result Stage</h2>
+        </div>
+
+        <div class="result-layout">
+          <div class="result-image" role="img" aria-label="Generated result placeholder">
+            <span>FLOW</span>
+          </div>
+          <div class="task-card">
+            <dl>
+              <div>
+                <dt>Task Status</dt>
+                <dd><span class="status-dot"></span>Ready</dd>
+              </div>
+              <div>
+                <dt>Result</dt>
+                <dd>Awaiting runner output</dd>
+              </div>
+              <div>
+                <dt>Project Name</dt>
+                <dd>Noir City Sequence</dd>
+              </div>
+              <div>
+                <dt>Prompt</dt>
+                <dd>A rain-soaked cyber-noir street outside a vintage cinema.</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>FlowStudio</span>
+      <a href="https://github.com/ZeChen-AI/FlowStudio.github.io" target="_blank" rel="noreferrer">
+        github.com/ZeChen-AI/FlowStudio.github.io
+      </a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
