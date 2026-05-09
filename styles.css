@@ -126,8 +126,10 @@ textarea {
 
 .hero {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(420px, 1.14fr);
   align-items: center;
+  gap: clamp(28px, 5vw, 80px);
   min-height: 92vh;
   padding: 132px clamp(20px, 6vw, 96px) 80px;
   overflow: hidden;
@@ -150,7 +152,7 @@ textarea {
 
 .hero-overlay {
   background:
-    linear-gradient(90deg, rgba(9, 9, 8, 0.92) 0%, rgba(9, 9, 8, 0.73) 36%, rgba(9, 9, 8, 0.22) 82%),
+    linear-gradient(90deg, rgba(9, 9, 8, 0.94) 0%, rgba(9, 9, 8, 0.76) 38%, rgba(9, 9, 8, 0.4) 100%),
     linear-gradient(180deg, rgba(9, 9, 8, 0.12), var(--black) 96%);
 }
 
@@ -193,11 +195,335 @@ h1 {
   line-height: 1.58;
 }
 
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.hero-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 13px;
+  color: rgba(244, 239, 229, 0.86);
+  background: rgba(244, 239, 229, 0.07);
+  border: 1px solid rgba(244, 239, 229, 0.15);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 36px;
+}
+
+.hero-workbench {
+  position: relative;
+  z-index: 2;
+  width: min(760px, 100%);
+  justify-self: end;
+  overflow: hidden;
+  border: 1px solid rgba(244, 239, 229, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(244, 239, 229, 0.12), rgba(244, 239, 229, 0.035)),
+    rgba(15, 14, 13, 0.86);
+  box-shadow:
+    0 34px 100px rgba(0, 0, 0, 0.58),
+    0 0 90px rgba(216, 144, 53, 0.12);
+  backdrop-filter: blur(22px);
+}
+
+.hero-workbench::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, rgba(244, 181, 91, 0.32), transparent 34%, rgba(136, 144, 151, 0.2) 74%, rgba(168, 62, 49, 0.22));
+  opacity: 0.42;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+.workbench-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 16px;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(244, 239, 229, 0.12);
+  background: rgba(9, 9, 8, 0.5);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.workbench-topbar strong {
+  margin-left: auto;
+  color: var(--green);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.topbar-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--amber-bright);
+  box-shadow: 0 0 18px rgba(244, 181, 91, 0.8);
+}
+
+.workbench-grid {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr) 170px;
+  min-height: 430px;
+}
+
+.project-rail,
+.task-console {
+  padding: 16px 12px;
+  background: rgba(9, 9, 8, 0.42);
+}
+
+.project-rail {
+  border-right: 1px solid rgba(244, 239, 229, 0.1);
+}
+
+.task-console {
+  border-left: 1px solid rgba(244, 239, 229, 0.1);
+}
+
+.rail-title {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.project-pill {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 36px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+  color: var(--muted);
+  background: rgba(244, 239, 229, 0.055);
+  border: 1px solid rgba(244, 239, 229, 0.1);
+  border-radius: 6px;
+  cursor: default;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.project-pill.active {
+  color: #17120c;
+  background: var(--amber-bright);
+}
+
+.asset-stack {
+  display: grid;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.asset-stack span {
+  height: 52px;
+  border: 1px solid rgba(244, 239, 229, 0.13);
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(244, 181, 91, 0.22), rgba(136, 144, 151, 0.08)),
+    url("assets/studio-hero.png") center / cover;
+}
+
+.asset-stack span:nth-child(2) {
+  filter: grayscale(0.7);
+}
+
+.asset-stack span:nth-child(3) {
+  background:
+    linear-gradient(135deg, rgba(131, 196, 156, 0.26), rgba(9, 9, 8, 0.4)),
+    repeating-linear-gradient(45deg, rgba(244, 239, 229, 0.18) 0 6px, transparent 6px 12px);
+}
+
+.canvas-stage {
+  padding: 14px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(244, 181, 91, 0.13), transparent 28%),
+    rgba(13, 13, 12, 0.7);
+}
+
+.canvas-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-bottom: 12px;
+}
+
+.canvas-toolbar span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 10px;
+  color: var(--muted);
+  background: rgba(244, 239, 229, 0.07);
+  border: 1px solid rgba(244, 239, 229, 0.12);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.canvas-toolbar span:nth-child(3) {
+  color: #17120c;
+  background: var(--amber-bright);
+}
+
+.canvas-image {
+  position: relative;
+  min-height: 354px;
+  overflow: hidden;
+  border: 1px solid rgba(244, 239, 229, 0.14);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(9, 9, 8, 0.1), rgba(9, 9, 8, 0.44)),
+    url("assets/studio-hero.png") center / cover;
+}
+
+.canvas-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(244, 239, 229, 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(244, 239, 229, 0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.mask-glow {
+  position: absolute;
+  top: 28%;
+  left: 34%;
+  width: 26%;
+  aspect-ratio: 1.1;
+  border-radius: 45% 55% 48% 52%;
+  background: rgba(131, 196, 156, 0.25);
+  box-shadow: 0 0 46px rgba(131, 196, 156, 0.36);
+  filter: blur(1px);
+}
+
+.bbox {
+  position: absolute;
+  border: 2px solid rgba(244, 181, 91, 0.96);
+  border-radius: 5px;
+  box-shadow:
+    0 0 0 999px rgba(9, 9, 8, 0.18),
+    0 0 30px rgba(244, 181, 91, 0.24);
+}
+
+.bbox-main {
+  top: 26%;
+  left: 30%;
+  width: 42%;
+  height: 32%;
+}
+
+.bbox-secondary {
+  right: 12%;
+  bottom: 16%;
+  width: 24%;
+  height: 18%;
+  border-color: rgba(131, 196, 156, 0.88);
+  box-shadow: 0 0 22px rgba(131, 196, 156, 0.22);
+}
+
+.bbox i {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--amber-bright);
+  border: 2px solid #17120c;
+  border-radius: 50%;
+}
+
+.bbox-secondary i {
+  background: var(--green);
+}
+
+.bbox i:nth-child(1) {
+  top: -6px;
+  left: -6px;
+}
+
+.bbox i:nth-child(2) {
+  top: -6px;
+  right: -6px;
+}
+
+.bbox i:nth-child(3) {
+  right: -6px;
+  bottom: -6px;
+}
+
+.bbox i:nth-child(4) {
+  bottom: -6px;
+  left: -6px;
+}
+
+.console-field {
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(244, 239, 229, 0.1);
+  border-radius: 6px;
+  background: rgba(244, 239, 229, 0.055);
+}
+
+.console-field span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--soft);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.console-field strong,
+.console-field p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.42;
+}
+
+.console-meter {
+  height: 8px;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(244, 239, 229, 0.08);
+}
+
+.console-meter span {
+  display: block;
+  width: 68%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--amber), var(--green));
+  box-shadow: 0 0 24px rgba(244, 181, 91, 0.35);
 }
 
 .button {
@@ -691,6 +1017,14 @@ dd {
     grid-template-columns: 1fr;
   }
 
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-workbench {
+    justify-self: stretch;
+  }
+
   .pipeline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -718,6 +1052,27 @@ dd {
 
   .hero-copy {
     font-size: 17px;
+  }
+
+  .hero-tags span {
+    font-size: 12px;
+  }
+
+  .workbench-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-rail,
+  .task-console {
+    display: none;
+  }
+
+  .canvas-stage {
+    padding: 12px;
+  }
+
+  .canvas-image {
+    min-height: 300px;
   }
 
   .button {
