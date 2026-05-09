@@ -178,9 +178,11 @@ p {
 
 h1 {
   margin: 0;
-  font-size: clamp(62px, 11vw, 150px);
+  max-width: 100%;
+  font-size: clamp(58px, 8.4vw, 132px);
   line-height: 0.88;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .hero-copy {
@@ -478,9 +480,73 @@ textarea:focus {
   mix-blend-mode: screen;
 }
 
+.edit-selection {
+  position: absolute;
+  z-index: 2;
+  top: 28%;
+  right: 18%;
+  width: 36%;
+  aspect-ratio: 1.45;
+  border: 2px solid rgba(244, 181, 91, 0.88);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px rgba(9, 9, 8, 0.65),
+    0 0 24px rgba(244, 181, 91, 0.22);
+}
+
+.edit-selection::before,
+.edit-selection::after {
+  content: "";
+  position: absolute;
+  background: rgba(244, 181, 91, 0.5);
+}
+
+.edit-selection::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.edit-selection::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+}
+
+.edit-selection span {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--amber-bright);
+  border: 2px solid #17120c;
+  border-radius: 50%;
+}
+
+.edit-selection span:nth-child(1) {
+  top: -6px;
+  left: -6px;
+}
+
+.edit-selection span:nth-child(2) {
+  top: -6px;
+  right: -6px;
+}
+
+.edit-selection span:nth-child(3) {
+  right: -6px;
+  bottom: -6px;
+}
+
+.edit-selection span:nth-child(4) {
+  bottom: -6px;
+  left: -6px;
+}
+
 .preview-title-block {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .preview-title-block h3 {
@@ -647,7 +713,7 @@ dd {
   }
 
   h1 {
-    font-size: clamp(50px, 18vw, 86px);
+    font-size: clamp(42px, 13.6vw, 74px);
   }
 
   .hero-copy {

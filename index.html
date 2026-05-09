@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="FlowStudio is a cinematic AI production workspace for image generation and editing tasks."
+      content="FlowStudio is an interactive and friendly visual generation and editing system."
     />
     <title>FlowStudio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -42,10 +42,10 @@
         <img class="hero-image" src="assets/studio-hero.png" alt="" />
         <div class="hero-overlay"></div>
         <div class="hero-content">
-          <p class="eyebrow">AI Film Production Workspace</p>
+          <p class="eyebrow">Visual Generation & Editing</p>
           <h1 id="hero-title">FlowStudio</h1>
           <p class="hero-copy">
-            把项目、镜头提示词、生成任务和 Python AI Runner 收进同一个制片厂工作台。
+            交互式友好的视觉生成与编辑系统
           </p>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button button-primary" href="#studio">Open Studio</a>
@@ -111,6 +111,12 @@
             </div>
             <div class="monitor-frame">
               <div class="scanline"></div>
+              <div class="edit-selection" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
               <div class="preview-title-block">
                 <p class="eyebrow">Shot Preview</p>
                 <h3 id="preview-title">Noir City Sequence</h3>
