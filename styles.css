@@ -860,7 +860,8 @@ textarea:focus {
   position: absolute;
   inset: 0;
   height: 100%;
-  opacity: 0.34;
+  opacity: 0;
+  pointer-events: none;
 }
 
 #frame-canvas {

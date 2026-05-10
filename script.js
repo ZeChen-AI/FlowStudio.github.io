@@ -176,12 +176,19 @@ videoInput?.addEventListener("change", () => {
 
   videoObjectUrl = URL.createObjectURL(file);
   videoPreview.src = videoObjectUrl;
+  videoPreview.pause();
+  videoPreview.currentTime = 0;
   videoMeta.textContent = `${file.name} · ${formatBytes(file.size)} · ${file.type || "video"}`;
   setMessage("Video loaded. Draw a rectangle on the first frame or upload a mask.", "success");
 });
 
 videoPreview?.addEventListener("loadeddata", () => {
-  videoPreview.currentTime = 0;
+  if (videoPreview.readyState >= 2) {
+    captureFirstFrame();
+  }
+});
+
+videoPreview?.addEventListener("seeked", () => {
   captureFirstFrame();
 });
 
