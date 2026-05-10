@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="FlowStudio is an interactive and friendly visual generation and editing system."
+      content="FlowStudio is a lightweight Java-orchestrated AI video editing studio."
     />
-    <title>FlowStudio</title>
+    <title>FlowStudio Video Editor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -42,36 +42,34 @@
         <img class="hero-image" src="assets/studio-hero.png" alt="" />
         <div class="hero-overlay"></div>
         <div class="hero-content">
-          <p class="eyebrow">Visual Generation & Editing</p>
+          <p class="eyebrow">Java + AutoDL Video Editing</p>
           <h1 id="hero-title">FlowStudio</h1>
           <p class="hero-copy">
-            交互式友好的视觉生成与编辑系统
+            面向课堂演示的交互式视频编辑系统：上传视频、框选 mask、提交 prompt，由 Java 后端编排 AutoDL 算法模块生成结果。
           </p>
           <div class="hero-tags" aria-label="FlowStudio editing capabilities">
-            <span>Project</span>
-            <span>Import Image</span>
-            <span>Draw BBox</span>
-            <span>FlowEdit + Mask</span>
+            <span>Input Video</span>
+            <span>Target Prompt</span>
+            <span>Draw Mask</span>
+            <span>AutoDL Runner</span>
           </div>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button button-primary" href="#studio">Open Studio</a>
-            <a class="button button-secondary" href="https://github.com/ZeChen-AI/FlowStudio.github.io" target="_blank" rel="noreferrer">
-              View Repository
-            </a>
+            <a class="button button-secondary" href="#pipeline">View Pipeline</a>
           </div>
         </div>
-        <div class="hero-workbench" aria-label="FlowStudio visual editor preview">
+        <div class="hero-workbench" aria-label="FlowStudio video editor preview">
           <div class="workbench-topbar">
             <span class="topbar-light"></span>
-            <span>Project: Poster Edit 01</span>
-            <strong>RUNNING</strong>
+            <span>Project: Local Video Edit</span>
+            <strong>READY</strong>
           </div>
           <div class="workbench-grid">
             <aside class="project-rail">
-              <span class="rail-title">Projects</span>
-              <button class="project-pill active" type="button">City Shot</button>
-              <button class="project-pill" type="button">Product Cut</button>
-              <button class="project-pill" type="button">Video Mask</button>
+              <span class="rail-title">Inputs</span>
+              <button class="project-pill active" type="button">MP4 Video</button>
+              <button class="project-pill" type="button">Mask PNG</button>
+              <button class="project-pill" type="button">Prompt</button>
               <div class="asset-stack" aria-hidden="true">
                 <span></span>
                 <span></span>
@@ -80,7 +78,7 @@
             </aside>
             <div class="canvas-stage">
               <div class="canvas-toolbar">
-                <span>Source</span>
+                <span>Frame</span>
                 <span>Mask</span>
                 <span>BBox</span>
               </div>
@@ -98,11 +96,11 @@
               <span class="rail-title">Task</span>
               <div class="console-field">
                 <span>Operation</span>
-                <strong>Edit</strong>
+                <strong>Video Edit</strong>
               </div>
               <div class="console-field">
                 <span>Prompt</span>
-                <p>Regenerate the selected poster area with a cinematic product shot.</p>
+                <p>Change only the selected area while keeping temporal consistency.</p>
               </div>
               <div class="console-meter">
                 <span></span>
@@ -115,50 +113,59 @@
       <section id="studio" class="workspace" aria-labelledby="studio-title">
         <div class="section-heading">
           <p class="eyebrow">Interactive Studio</p>
-          <h2 id="studio-title">Project Workspace</h2>
+          <h2 id="studio-title">Video Edit Workspace</h2>
         </div>
 
-        <div class="studio-shell">
-          <form class="control-panel" aria-label="FlowStudio task composer">
+        <form class="studio-shell" id="task-form" aria-label="FlowStudio task composer">
+          <section class="control-panel">
             <div class="field-grid">
               <label class="field">
                 <span>Project Name</span>
-                <input type="text" value="Noir City Sequence" aria-label="Project name" />
+                <input id="project-name" name="projectName" type="text" value="Noir City Sequence" />
               </label>
 
-              <fieldset class="mode-field">
-                <legend>Operation</legend>
-                <div class="segmented-control">
-                  <input type="radio" id="mode-generate" name="operation" checked />
-                  <label for="mode-generate">Generate</label>
-                  <input type="radio" id="mode-edit" name="operation" />
-                  <label for="mode-edit">Edit</label>
-                </div>
-              </fieldset>
+              <label class="field">
+                <span>Operation</span>
+                <input type="text" value="Video Edit" readonly />
+              </label>
             </div>
 
-            <label class="field prompt-field">
-              <span>Prompt</span>
-              <textarea rows="6" aria-label="Prompt">A rain-soaked cyber-noir street outside a vintage cinema, practical tungsten lights, cinematic framing, 35mm film grain.</textarea>
+            <label class="field">
+              <span>Input Video</span>
+              <input id="video-input" name="video" type="file" accept="video/mp4,video/webm,video/quicktime" />
             </label>
 
-            <div class="upload-strip">
-              <div>
-                <span class="upload-label">Optional Image</span>
-                <span class="upload-meta">PNG / JPG / WebP</span>
-              </div>
-              <button class="icon-button" type="button" aria-label="Upload image">
-                <span aria-hidden="true">+</span>
-              </button>
+            <div class="file-readout" id="video-meta">No video selected</div>
+
+            <div class="prompt-grid">
+              <label class="field">
+                <span>Source Prompt <small>Optional</small></span>
+                <textarea id="source-prompt" name="sourcePrompt" rows="4" placeholder="Describe the original video if helpful."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Target Prompt</span>
+                <textarea id="target-prompt" name="targetPrompt" rows="4" required>Change the selected object to a warm golden material while keeping the background unchanged.</textarea>
+              </label>
+            </div>
+
+            <div class="mask-controls" aria-label="Mask controls">
+              <label class="field">
+                <span>Mask File</span>
+                <input id="mask-input" name="maskFile" type="file" accept="image/png,image/jpeg" />
+              </label>
+              <button class="button button-secondary" id="clear-mask" type="button">Clear Mask</button>
             </div>
 
             <div class="panel-footer">
-              <span class="tone-chip">Cinematic</span>
-              <span class="tone-chip">BBox</span>
-              <span class="tone-chip">Mask</span>
-              <button class="button button-primary" type="button">Create Task</button>
+              <span class="tone-chip">MP4</span>
+              <span class="tone-chip">BBox Mask</span>
+              <span class="tone-chip">Java Runner</span>
+              <button class="button button-primary" id="submit-task" type="submit">Create Task</button>
             </div>
-          </form>
+
+            <p class="form-message" id="form-message" role="status"></p>
+          </section>
 
           <aside class="preview-panel" aria-labelledby="preview-title">
             <div class="monitor-top">
@@ -166,21 +173,22 @@
               <span></span>
               <span></span>
             </div>
-            <div class="monitor-frame">
-              <div class="scanline"></div>
-              <div class="edit-selection" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <div class="preview-title-block">
-                <p class="eyebrow">Shot Preview</p>
-                <h3 id="preview-title">Noir City Sequence</h3>
+            <div class="video-workbench">
+              <video id="video-preview" controls muted playsinline></video>
+              <canvas id="frame-canvas" aria-label="Draw a rectangular mask on the first video frame" hidden></canvas>
+              <div class="canvas-placeholder" id="canvas-placeholder">
+                Upload a video, then drag on the frame to draw a mask.
               </div>
             </div>
+            <div class="preview-meta">
+              <div>
+                <p class="eyebrow">Mask Preview</p>
+                <h3 id="preview-title">Frame Selection</h3>
+              </div>
+              <img id="mask-preview" alt="Generated mask preview" hidden />
+            </div>
           </aside>
-        </div>
+        </form>
       </section>
 
       <section id="pipeline" class="pipeline-band" aria-labelledby="pipeline-title">
@@ -192,28 +200,28 @@
         <div class="pipeline">
           <article class="pipeline-step">
             <span class="step-index">01</span>
-            <h3>Controller</h3>
-            <p>Request intake</p>
+            <h3>Frontend</h3>
+            <p>Upload video, prompt, mask</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">02</span>
-            <h3>Project</h3>
-            <p>Create project</p>
+            <h3>Controller</h3>
+            <p>Validate multipart request</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">03</span>
-            <h3>Task</h3>
-            <p>Create task</p>
+            <h3>Task Service</h3>
+            <p>Save files and track status</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">04</span>
-            <h3>FlowEdit + Mask</h3>
-            <p>Python runner</p>
+            <h3>AutoDL API</h3>
+            <p>Run edit.py pipeline</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">05</span>
             <h3>Result</h3>
-            <p>Update task</p>
+            <p>Preview and download video</p>
           </article>
         </div>
       </section>
@@ -225,28 +233,34 @@
         </div>
 
         <div class="result-layout">
-          <div class="result-image" role="img" aria-label="Generated result placeholder">
-            <span>FLOW</span>
+          <div class="result-video-wrap">
+            <video id="result-video" controls playsinline hidden></video>
+            <div class="result-placeholder" id="result-placeholder">Awaiting runner output</div>
           </div>
           <div class="task-card">
             <dl>
               <div>
                 <dt>Task Status</dt>
-                <dd><span class="status-dot"></span>Ready</dd>
+                <dd id="task-status"><span class="status-dot"></span>Ready</dd>
               </div>
               <div>
-                <dt>Result</dt>
-                <dd>Awaiting runner output</dd>
+                <dt>Task ID</dt>
+                <dd id="task-id">-</dd>
               </div>
               <div>
                 <dt>Project Name</dt>
-                <dd>Noir City Sequence</dd>
+                <dd id="task-project">Noir City Sequence</dd>
               </div>
               <div>
                 <dt>Prompt</dt>
-                <dd>A rain-soaked cyber-noir street outside a vintage cinema.</dd>
+                <dd id="task-prompt">Change the selected object to a warm golden material.</dd>
+              </div>
+              <div>
+                <dt>Message</dt>
+                <dd id="task-message">Ready to create a task.</dd>
               </div>
             </dl>
+            <a class="button button-primary download-link" id="download-link" href="#" download hidden>Download Result</a>
           </div>
         </div>
       </section>

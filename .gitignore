@@ -4,3 +4,9 @@ dist/
 .env
 .env.*
 *.log
+runtime/
+backend/runtime/
+backend/target/
+autodl/runtime/
+__pycache__/
+*.pyc
