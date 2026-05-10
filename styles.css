@@ -851,7 +851,6 @@ textarea:focus {
 #frame-canvas {
   width: 100%;
   max-height: 100%;
-  aspect-ratio: 16 / 9;
   object-fit: contain;
   background: #050505;
 }

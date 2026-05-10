@@ -37,6 +37,7 @@ let baseFrame = null;
 let dragStart = null;
 let activeTaskId = "";
 let pollTimer = 0;
+let frameCaptureRequested = false;
 
 function setMessage(message, tone = "neutral") {
   formMessage.textContent = message;
@@ -75,6 +76,7 @@ function drawBaseFrame() {
   if (!baseFrame) return;
   frameCanvas.width = baseFrame.width;
   frameCanvas.height = baseFrame.height;
+  frameCanvas.style.aspectRatio = `${baseFrame.width} / ${baseFrame.height}`;
   ctx.drawImage(baseFrame, 0, 0);
 }
 
@@ -141,6 +143,7 @@ function captureFirstFrame() {
   const height = videoPreview.videoHeight || 540;
   frameCanvas.width = width;
   frameCanvas.height = height;
+  frameCanvas.style.aspectRatio = `${width} / ${height}`;
   ctx.drawImage(videoPreview, 0, 0, width, height);
 
   baseFrame = new Image();
@@ -160,6 +163,8 @@ videoInput?.addEventListener("change", () => {
   maskPreview.removeAttribute("src");
   maskPreview.hidden = true;
   baseFrame = null;
+  frameCaptureRequested = false;
+  frameCanvas.style.removeProperty("aspect-ratio");
   ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
   frameCanvas.hidden = true;
   placeholder.hidden = false;
@@ -177,13 +182,17 @@ videoInput?.addEventListener("change", () => {
   videoObjectUrl = URL.createObjectURL(file);
   videoPreview.src = videoObjectUrl;
   videoPreview.pause();
-  videoPreview.currentTime = 0;
   videoMeta.textContent = `${file.name} · ${formatBytes(file.size)} · ${file.type || "video"}`;
   setMessage("Video loaded. Draw a rectangle on the first frame or upload a mask.", "success");
 });
 
 videoPreview?.addEventListener("loadeddata", () => {
-  if (videoPreview.readyState >= 2) {
+  if (frameCaptureRequested) return;
+  frameCaptureRequested = true;
+  const targetTime = Math.min(0.1, Math.max(0, (videoPreview.duration || 0) - 0.01));
+  if (Number.isFinite(targetTime) && targetTime > 0) {
+    videoPreview.currentTime = targetTime;
+  } else if (videoPreview.readyState >= 2) {
     captureFirstFrame();
   }
 });
