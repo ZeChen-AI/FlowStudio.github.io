@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import cv2
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 
@@ -29,6 +29,7 @@ async def edit(
     video: UploadFile = File(...),
     mask: UploadFile = File(...),
 ):
+    print(f"[FlowStudio AutoDL] /edit received taskId={taskId}, targetWord={targetWord}", flush=True)
     task_dir = TASK_DIR / safe_name(taskId)
     task_dir.mkdir(parents=True, exist_ok=True)
     input_video = task_dir / "input.mp4"
@@ -100,7 +101,9 @@ async def edit(
 def files(task_id: str, file_name: str):
     file_path = (TASK_DIR / safe_name(task_id) / safe_name(file_name)).resolve()
     if not str(file_path).startswith(str(TASK_DIR.resolve())):
-        return {"success": False, "message": "Invalid file path."}
+        raise HTTPException(status_code=400, detail="Invalid file path.")
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
     return FileResponse(file_path)
 
 

@@ -1,18 +1,23 @@
 package studio.flow.runner;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import studio.flow.config.FlowStudioProperties;
 import studio.flow.model.EditTask;
@@ -22,10 +27,18 @@ import studio.flow.model.EditTask;
 public class AutodlTaskRunner implements TaskRunner {
   private final FlowStudioProperties properties;
   private final RestClient restClient;
+  private final HttpClient httpClient;
+  private final ObjectMapper objectMapper;
 
-  public AutodlTaskRunner(FlowStudioProperties properties) {
+  public AutodlTaskRunner(FlowStudioProperties properties, ObjectMapper objectMapper) {
     this.properties = properties;
     this.restClient = RestClient.builder().build();
+    this.httpClient =
+        HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(20))
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
+    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -35,28 +48,8 @@ public class AutodlTaskRunner implements TaskRunner {
     }
 
     System.out.println("[FlowStudio] Calling AutoDL: " + normalizeBaseUrl() + "/edit");
-
-    MultipartBodyBuilder builder = new MultipartBodyBuilder();
-    builder.part("taskId", task.getTaskId());
-    builder.part("sourcePrompt", nullToEmpty(task.getSourcePrompt()));
-    builder.part("targetPrompt", task.getTargetPrompt());
-    builder.part("targetWord", task.getTargetWord());
-    builder.part("video", new FileSystemResource(task.getInputVideoPath())).contentType(MediaType.APPLICATION_OCTET_STREAM);
-    builder.part("mask", new FileSystemResource(task.getMaskPath())).contentType(MediaType.IMAGE_PNG);
-    MultiValueMap<String, org.springframework.http.HttpEntity<?>> body = builder.build();
-
-    Map<String, Object> response =
-        restClient
-            .post()
-            .uri(normalizeBaseUrl() + "/edit")
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(body)
-            .retrieve()
-            .body(new ParameterizedTypeReference<Map<String, Object>>() {});
-
-    if (response == null) {
-      return new RunnerResult(false, null, "AutoDL returned an empty response.");
-    }
+    String responseText = postMultipart(task);
+    Map<String, Object> response = objectMapper.readValue(responseText, new TypeReference<>() {});
 
     boolean success = Boolean.TRUE.equals(response.get("success"));
     String message = String.valueOf(response.getOrDefault("message", ""));
@@ -72,6 +65,59 @@ public class AutodlTaskRunner implements TaskRunner {
     Path output = task.getTaskDir().resolve("result.mp4");
     copyResult(String.valueOf(resultPathValue), output);
     return new RunnerResult(true, output, message.isBlank() ? "AutoDL edit success." : message);
+  }
+
+  private String postMultipart(EditTask task) throws IOException, InterruptedException {
+    String boundary = "FlowStudioBoundary" + UUID.randomUUID().toString().replace("-", "");
+    byte[] body = multipartBody(boundary, task);
+    System.out.println("[FlowStudio] AutoDL multipart bytes: " + body.length);
+
+    HttpRequest request =
+        HttpRequest.newBuilder()
+            .uri(URI.create(normalizeBaseUrl() + "/edit"))
+            .version(HttpClient.Version.HTTP_1_1)
+            .timeout(Duration.ofHours(2))
+            .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+            .POST(HttpRequest.BodyPublishers.ofByteArray(body))
+            .build();
+
+    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    System.out.println("[FlowStudio] AutoDL response status: " + response.statusCode());
+    if (response.statusCode() < 200 || response.statusCode() >= 300) {
+      throw new IOException("AutoDL HTTP " + response.statusCode() + ": " + response.body());
+    }
+    return response.body();
+  }
+
+  private byte[] multipartBody(String boundary, EditTask task) throws IOException {
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    writeField(output, boundary, "taskId", task.getTaskId());
+    writeField(output, boundary, "sourcePrompt", nullToEmpty(task.getSourcePrompt()));
+    writeField(output, boundary, "targetPrompt", task.getTargetPrompt());
+    writeField(output, boundary, "targetWord", task.getTargetWord());
+    writeFile(output, boundary, "video", task.getInputVideoPath(), "video/mp4");
+    writeFile(output, boundary, "mask", task.getMaskPath(), "image/png");
+    output.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+    return output.toByteArray();
+  }
+
+  private void writeField(ByteArrayOutputStream output, String boundary, String name, String value)
+      throws IOException {
+    output.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+    output.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+    output.write(nullToEmpty(value).getBytes(StandardCharsets.UTF_8));
+    output.write("\r\n".getBytes(StandardCharsets.UTF_8));
+  }
+
+  private void writeFile(ByteArrayOutputStream output, String boundary, String name, Path path, String contentType)
+      throws IOException {
+    output.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+    output.write(
+        ("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + path.getFileName() + "\"\r\n")
+            .getBytes(StandardCharsets.UTF_8));
+    output.write(("Content-Type: " + contentType + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+    output.write(Files.readAllBytes(path));
+    output.write("\r\n".getBytes(StandardCharsets.UTF_8));
   }
 
   private void copyResult(String resultPath, Path output) throws IOException {
