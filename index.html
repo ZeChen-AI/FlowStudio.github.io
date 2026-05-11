@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="FlowStudio is a lightweight Java-orchestrated AI video editing studio."
+      content="FlowStudio helps creators direct precise, local video edits from a first-frame selection."
     />
-    <title>FlowStudio Video Editor</title>
+    <title>FlowStudio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -24,8 +24,8 @@
       </a>
       <nav class="nav-links" aria-label="Primary">
         <a href="#studio">Studio</a>
-        <a href="#pipeline">Pipeline</a>
-        <a href="#result">Result</a>
+        <a href="#pipeline">Workflow</a>
+        <a href="#result">Preview</a>
       </nav>
       <a
         class="repo-link"
@@ -41,35 +41,36 @@
       <section class="hero" aria-labelledby="hero-title">
         <img class="hero-image" src="assets/studio-hero.png" alt="" />
         <div class="hero-overlay"></div>
+        <div class="hero-ambient" aria-hidden="true"></div>
         <div class="hero-content">
-          <p class="eyebrow">Java + AutoDL Video Editing</p>
+          <p class="eyebrow">Controlled Video Editing</p>
           <h1 id="hero-title">FlowStudio</h1>
           <p class="hero-copy">
-            面向课堂演示的交互式视频编辑系统：上传视频、框选 mask、提交 prompt，由 Java 后端编排 AutoDL 算法模块生成结果。
+            Select a region in the first frame, describe the change, and carry the edit through the clip.
           </p>
           <div class="hero-tags" aria-label="FlowStudio editing capabilities">
-            <span>Input Video</span>
-            <span>Target Prompt</span>
-            <span>Draw Mask</span>
-            <span>AutoDL Runner</span>
+            <span>First-frame selection</span>
+            <span>Local edits</span>
+            <span>Temporal continuity</span>
+            <span>Preview-ready output</span>
           </div>
           <div class="hero-actions" aria-label="Primary actions">
-            <a class="button button-primary" href="#studio">Open Studio</a>
-            <a class="button button-secondary" href="#pipeline">View Pipeline</a>
+            <a class="button button-primary" href="#studio">Start Editing</a>
+            <a class="button button-secondary" href="#pipeline">View Workflow</a>
           </div>
         </div>
         <div class="hero-workbench" aria-label="FlowStudio video editor preview">
           <div class="workbench-topbar">
             <span class="topbar-light"></span>
-            <span>Project: Local Video Edit</span>
+            <span>Project: Directed Local Edit</span>
             <strong>READY</strong>
           </div>
           <div class="workbench-grid">
             <aside class="project-rail">
-              <span class="rail-title">Inputs</span>
-              <button class="project-pill active" type="button">MP4 Video</button>
-              <button class="project-pill" type="button">Mask PNG</button>
-              <button class="project-pill" type="button">Prompt</button>
+              <span class="rail-title">Assets</span>
+              <button class="project-pill active" type="button">Source Clip</button>
+              <button class="project-pill" type="button">Selection</button>
+              <button class="project-pill" type="button">Edit Brief</button>
               <div class="asset-stack" aria-hidden="true">
                 <span></span>
                 <span></span>
@@ -79,8 +80,8 @@
             <div class="canvas-stage">
               <div class="canvas-toolbar">
                 <span>Frame</span>
-                <span>Mask</span>
-                <span>BBox</span>
+                <span>Selection</span>
+                <span>Region</span>
               </div>
               <div class="canvas-image">
                 <div class="mask-glow"></div>
@@ -93,14 +94,14 @@
               </div>
             </div>
             <aside class="task-console">
-              <span class="rail-title">Task</span>
+              <span class="rail-title">Render</span>
               <div class="console-field">
-                <span>Operation</span>
-                <strong>Video Edit</strong>
+                <span>Mode</span>
+                <strong>Directed Edit</strong>
               </div>
               <div class="console-field">
-                <span>Prompt</span>
-                <p>Change only the selected area while keeping temporal consistency.</p>
+                <span>Direction</span>
+                <p>Transform the selected subject while preserving the surrounding scene.</p>
               </div>
               <div class="console-meter">
                 <span></span>
@@ -112,8 +113,8 @@
 
       <section id="studio" class="workspace" aria-labelledby="studio-title">
         <div class="section-heading">
-          <p class="eyebrow">Interactive Studio</p>
-          <h2 id="studio-title">Video Edit Workspace</h2>
+          <p class="eyebrow">Create a Controlled Edit</p>
+          <h2 id="studio-title">Edit Workspace</h2>
         </div>
 
         <form class="studio-shell" id="task-form" aria-label="FlowStudio task composer">
@@ -121,12 +122,12 @@
             <div class="field-grid">
               <label class="field">
                 <span>Project Name</span>
-                <input id="project-name" name="projectName" type="text" value="Noir City Sequence" />
+                <input id="project-name" name="projectName" type="text" value="Project_Flower" />
               </label>
 
               <label class="field">
-                <span>Operation</span>
-                <input type="text" value="Video Edit" readonly />
+                <span>Mode</span>
+                <input type="text" value="Directed Edit" readonly />
               </label>
             </div>
 
@@ -135,38 +136,38 @@
               <input id="video-input" name="video" type="file" accept="video/mp4,video/webm,video/quicktime" />
             </label>
 
-            <div class="file-readout" id="video-meta">No video selected</div>
+            <div class="file-readout" id="video-meta">No clip selected</div>
 
             <div class="prompt-grid">
               <label class="field">
-                <span>Source Prompt <small>Optional</small></span>
-                <textarea id="source-prompt" name="sourcePrompt" rows="4" placeholder="Describe the original video if helpful."></textarea>
+                <span>Original Scene <small>Optional</small></span>
+                <textarea id="source-prompt" name="sourcePrompt" rows="4" placeholder="Describe the original subject, setting, and visual style."></textarea>
               </label>
 
               <label class="field">
-                <span>Target Prompt</span>
-                <textarea id="target-prompt" name="targetPrompt" rows="4" required>Change the selected object to a warm golden material while keeping the background unchanged.</textarea>
+                <span>Edit Direction</span>
+                <textarea id="target-prompt" name="targetPrompt" rows="4" required>A red rose is blooming in a garden surrounded by many other blue flowers, its petals glowing softly in sunlight against a blurred green background.</textarea>
               </label>
             </div>
 
             <label class="field">
-              <span>Target Word</span>
+              <span>Focus Word</span>
               <input id="target-word" name="targetWord" type="text" value="rose" placeholder="rose, sunflower, car..." />
             </label>
 
             <div class="mask-controls" aria-label="Mask controls">
               <label class="field">
-                <span>Mask File</span>
+                <span>Selection Mask</span>
                 <input id="mask-input" name="maskFile" type="file" accept="image/png,image/jpeg" />
               </label>
-              <button class="button button-secondary" id="clear-mask" type="button">Clear Mask</button>
+              <button class="button button-secondary" id="clear-mask" type="button">Clear Selection</button>
             </div>
 
             <div class="panel-footer">
-              <span class="tone-chip">MP4</span>
-              <span class="tone-chip">BBox Mask</span>
-              <span class="tone-chip">Java Runner</span>
-              <button class="button button-primary" id="submit-task" type="submit">Create Task</button>
+              <span class="tone-chip">Source Clip</span>
+              <span class="tone-chip">Frame Selection</span>
+              <span class="tone-chip">Model Render</span>
+              <button class="button button-primary" id="submit-task" type="submit">Run Edit</button>
             </div>
 
             <p class="form-message" id="form-message" role="status"></p>
@@ -182,13 +183,13 @@
               <video id="video-preview" muted playsinline preload="metadata"></video>
               <canvas id="frame-canvas" aria-label="Draw a rectangular mask on the first video frame" hidden></canvas>
               <div class="canvas-placeholder" id="canvas-placeholder">
-                Upload a video, then drag on the frame to draw a mask.
+                Import a clip, then drag across the first frame to define the edit region.
               </div>
             </div>
             <div class="preview-meta">
               <div>
-                <p class="eyebrow">Mask Preview</p>
-                <h3 id="preview-title">Frame Selection</h3>
+                <p class="eyebrow">Selection Preview</p>
+                <h3 id="preview-title">First-frame Region</h3>
               </div>
               <img id="mask-preview" alt="Generated mask preview" hidden />
             </div>
@@ -198,74 +199,74 @@
 
       <section id="pipeline" class="pipeline-band" aria-labelledby="pipeline-title">
         <div class="section-heading">
-          <p class="eyebrow">Java Service</p>
-          <h2 id="pipeline-title">Orchestration Flow</h2>
+          <p class="eyebrow">System Workflow</p>
+          <h2 id="pipeline-title">From Selection to Render</h2>
         </div>
 
         <div class="pipeline">
           <article class="pipeline-step">
             <span class="step-index">01</span>
-            <h3>Frontend</h3>
-            <p>Upload video, prompt, mask</p>
+            <h3>Import</h3>
+            <p>Upload the source clip</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">02</span>
-            <h3>Controller</h3>
-            <p>Validate multipart request</p>
+            <h3>Select</h3>
+            <p>Mark the edit region</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">03</span>
-            <h3>Task Service</h3>
-            <p>Save files and track status</p>
+            <h3>Describe</h3>
+            <p>Set direction and focus</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">04</span>
-            <h3>AutoDL API</h3>
-            <p>Run edit.py pipeline</p>
+            <h3>Render</h3>
+            <p>Run the model pipeline</p>
           </article>
           <article class="pipeline-step">
             <span class="step-index">05</span>
-            <h3>Result</h3>
-            <p>Preview and download video</p>
+            <h3>Review</h3>
+            <p>Preview and download</p>
           </article>
         </div>
       </section>
 
       <section id="result" class="result-zone" aria-labelledby="result-title">
         <div class="section-heading">
-          <p class="eyebrow">Task Output</p>
-          <h2 id="result-title">Result Stage</h2>
+          <p class="eyebrow">Rendered Output</p>
+          <h2 id="result-title">Edited Preview</h2>
         </div>
 
         <div class="result-layout">
           <div class="result-video-wrap">
             <video id="result-video" controls playsinline hidden></video>
-            <div class="result-placeholder" id="result-placeholder">Awaiting runner output</div>
+            <div class="result-placeholder" id="result-placeholder">Waiting for the rendered clip</div>
           </div>
           <div class="task-card">
             <dl>
               <div>
-                <dt>Task Status</dt>
+                <dt>Render Status</dt>
                 <dd id="task-status"><span class="status-dot"></span>Ready</dd>
               </div>
               <div>
-                <dt>Task ID</dt>
+                <dt>Render ID</dt>
                 <dd id="task-id">-</dd>
               </div>
               <div>
                 <dt>Project Name</dt>
-                <dd id="task-project">Noir City Sequence</dd>
+                <dd id="task-project">Project_Flower</dd>
               </div>
               <div>
-                <dt>Prompt</dt>
-                <dd id="task-prompt">Change the selected object to a warm golden material.</dd>
+                <dt>Edit Direction</dt>
+                <dd id="task-prompt">A red rose blooms within the selected region.</dd>
               </div>
               <div>
                 <dt>Message</dt>
-                <dd id="task-message">Ready to create a task.</dd>
+                <dd id="task-message">Ready to render an edit.</dd>
               </div>
             </dl>
-            <a class="button button-primary download-link" id="download-link" href="#" download hidden>Download Result</a>
+            <a class="button button-primary download-link" id="download-link" href="#" download hidden>Download Edited Video</a>
           </div>
         </div>
       </section>

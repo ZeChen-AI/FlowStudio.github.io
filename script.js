@@ -46,7 +46,15 @@ function setMessage(message, tone = "neutral") {
 }
 
 function setStatus(status, message = "") {
-  taskStatus.innerHTML = `<span class="status-dot status-${status.toLowerCase()}"></span>${status}`;
+  const labels = {
+    PENDING: "Queued",
+    RUNNING: "Rendering",
+    SUCCESS: "Completed",
+    FAILED: "Needs attention",
+    READY: "Ready",
+  };
+  const displayStatus = labels[status] || status;
+  taskStatus.innerHTML = `<span class="status-dot status-${status.toLowerCase()}"></span>${displayStatus}`;
   taskMessage.textContent = message || status;
 }
 
@@ -117,12 +125,12 @@ function updateMaskPreview(blob, source) {
   maskPreview.hidden = false;
   currentMaskBlob = blob;
   currentMaskSource = source;
-  setMessage(source === "drawn" ? "Mask generated from the selected rectangle." : "Mask file loaded.", "success");
+  setMessage(source === "drawn" ? "Selection mask created." : "Selection mask loaded.", "success");
 }
 
 function generateMask(rect) {
   if (rect.w < 8 || rect.h < 8) {
-    setMessage("Please draw a larger mask rectangle.", "error");
+    setMessage("Draw a larger selection region.", "error");
     return;
   }
 
@@ -174,7 +182,7 @@ videoInput?.addEventListener("change", () => {
   resetResult();
 
   if (!file) {
-    videoMeta.textContent = "No video selected";
+    videoMeta.textContent = "No clip selected";
     videoPreview.removeAttribute("src");
     videoPreview.load();
     return;
@@ -184,7 +192,7 @@ videoInput?.addEventListener("change", () => {
   videoPreview.src = videoObjectUrl;
   videoPreview.pause();
   videoMeta.textContent = `${file.name} · ${formatBytes(file.size)} · ${file.type || "video"}`;
-  setMessage("Video loaded. Draw a rectangle on the first frame or upload a mask.", "success");
+  setMessage("Clip loaded. Draw a region on the first frame or upload a mask.", "success");
 });
 
 videoPreview?.addEventListener("loadeddata", () => {
@@ -206,7 +214,7 @@ maskInput?.addEventListener("change", () => {
   const file = maskInput.files?.[0];
   if (!file) return;
   if (!["image/png", "image/jpeg"].includes(file.type)) {
-    setMessage("Mask must be PNG or JPG.", "error");
+    setMessage("Selection masks must be PNG or JPG.", "error");
     maskInput.value = "";
     return;
   }
@@ -220,7 +228,7 @@ clearMaskButton?.addEventListener("click", () => {
   maskPreview.removeAttribute("src");
   maskPreview.hidden = true;
   drawBaseFrame();
-  setMessage("Mask cleared. Draw a new rectangle or upload a mask file.");
+  setMessage("Selection cleared. Draw a new region or upload a mask.");
 });
 
 frameCanvas?.addEventListener("pointerdown", (event) => {
@@ -254,7 +262,7 @@ function renderTask(task) {
   taskIdText.textContent = activeTaskId || "-";
   taskProject.textContent = task.projectName || projectNameInput.value || "-";
   taskPrompt.textContent = task.targetPrompt || targetPromptInput.value || "-";
-  setStatus(task.status || "READY", task.errorMessage || task.message || "Task updated.");
+  setStatus(task.status || "READY", task.errorMessage || task.message || "Render updated.");
 
   if (task.status === "SUCCESS" && task.resultUrl) {
     resultVideo.src = task.resultUrl;
@@ -264,15 +272,15 @@ function renderTask(task) {
     downloadLink.hidden = false;
     clearPolling();
     submitButton.disabled = false;
-    submitButton.textContent = "Create Task";
-    setMessage("Task completed. Result video is ready.", "success");
+    submitButton.textContent = "Run Edit";
+    setMessage("Edit completed. Preview is ready.", "success");
   }
 
   if (task.status === "FAILED") {
     clearPolling();
     submitButton.disabled = false;
-    submitButton.textContent = "Create Task";
-    setMessage(task.errorMessage || "Task failed.", "error");
+    submitButton.textContent = "Run Edit";
+    setMessage(task.errorMessage || "The edit needs attention.", "error");
   }
 }
 
@@ -295,19 +303,19 @@ form?.addEventListener("submit", async (event) => {
   const targetWord = targetWordInput.value.trim();
 
   if (!video) {
-    setMessage("Please select an input video before creating a task.", "error");
+    setMessage("Select a source clip before rendering.", "error");
     return;
   }
   if (!targetPrompt) {
-    setMessage("Target prompt is required.", "error");
+    setMessage("Edit direction is required.", "error");
     return;
   }
   if (!targetWord) {
-    setMessage("Target word is required for FlowAnchor editing.", "error");
+    setMessage("Focus word is required.", "error");
     return;
   }
   if (!currentMaskBlob) {
-    setMessage("Please upload a mask or draw a rectangle on the frame.", "error");
+    setMessage("Draw a selection region or upload a mask.", "error");
     return;
   }
 
@@ -320,10 +328,10 @@ form?.addEventListener("submit", async (event) => {
   formData.append("mask", currentMaskBlob, currentMaskSource === "uploaded" ? "mask-upload.png" : "mask-bbox.png");
 
   submitButton.disabled = true;
-  submitButton.textContent = "Submitting...";
+  submitButton.textContent = "Preparing...";
   resetResult();
-  setStatus("PENDING", "Uploading task files.");
-  setMessage("Submitting task to Java backend...");
+  setStatus("PENDING", "Preparing assets for rendering.");
+  setMessage("Sending the edit to FlowStudio...");
 
   try {
     const response = await fetch(`${API_BASE}/api/tasks/edit`, {
@@ -331,16 +339,16 @@ form?.addEventListener("submit", async (event) => {
       body: formData,
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.errorMessage || data.message || "Task submission failed.");
+    if (!response.ok) throw new Error(data.errorMessage || data.message || "Render request failed.");
 
     activeTaskId = data.taskId;
     renderTask(data);
-    submitButton.textContent = "Task Running";
-    setMessage("Task created. Polling Java backend for status.", "success");
+    submitButton.textContent = "Rendering...";
+    setMessage("Edit queued. Tracking render progress.", "success");
     startPolling(data.taskId);
   } catch (error) {
     submitButton.disabled = false;
-    submitButton.textContent = "Create Task";
+    submitButton.textContent = "Run Edit";
     setStatus("FAILED", error.message);
     setMessage(error.message, "error");
   }
