@@ -11,7 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import studio.flow.config.FlowStudioProperties;
@@ -34,13 +34,16 @@ public class AutodlTaskRunner implements TaskRunner {
       throw new IllegalStateException("AUTODL_BASE_URL is required when mock runner is disabled.");
     }
 
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("taskId", task.getTaskId());
-    body.add("sourcePrompt", nullToEmpty(task.getSourcePrompt()));
-    body.add("targetPrompt", task.getTargetPrompt());
-    body.add("targetWord", task.getTargetWord());
-    body.add("video", new FileSystemResource(task.getInputVideoPath()));
-    body.add("mask", new FileSystemResource(task.getMaskPath()));
+    System.out.println("[FlowStudio] Calling AutoDL: " + normalizeBaseUrl() + "/edit");
+
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    builder.part("taskId", task.getTaskId());
+    builder.part("sourcePrompt", nullToEmpty(task.getSourcePrompt()));
+    builder.part("targetPrompt", task.getTargetPrompt());
+    builder.part("targetWord", task.getTargetWord());
+    builder.part("video", new FileSystemResource(task.getInputVideoPath())).contentType(MediaType.APPLICATION_OCTET_STREAM);
+    builder.part("mask", new FileSystemResource(task.getMaskPath())).contentType(MediaType.IMAGE_PNG);
+    MultiValueMap<String, org.springframework.http.HttpEntity<?>> body = builder.build();
 
     Map<String, Object> response =
         restClient

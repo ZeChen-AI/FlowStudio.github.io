@@ -82,6 +82,7 @@ public class TaskService {
     EditTask task = requireTask(taskId);
     task.setStatus(TaskStatus.RUNNING);
     task.setMessage("Runner is processing the video.");
+    System.out.println("[FlowStudio] Task " + taskId + " started runner.");
 
     try {
       RunnerResult result = runner.run(task);

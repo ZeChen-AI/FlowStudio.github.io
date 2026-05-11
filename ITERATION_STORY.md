@@ -105,14 +105,15 @@ mock runner 的价值是先验证：
 
 ```bash
 python edit.py \
-  --video input.mp4 \
-  --mask mask.png \
-  --target_prompt "..." \
-  --source_prompt "..." \
-  --output result.mp4
+  --video_path input.mp4 \
+  --output_path result.mp4 \
+  --src_prompt "..." \
+  --tar_prompt "..." \
+  --mask_path mask_frames \
+  --target_word "rose"
 ```
 
-如果真实 `edit.py` 参数不同，只需要修改 FastAPI wrapper 的 command 部分，不需要改前端和 Java 接口。
+真实 FlowAnchor 需要逐帧 mask 目录，因此当前 wrapper 先将前端第一帧 mask 扩展成静态逐帧 mask，后续再替换为 VACE / 光流传播逻辑。
 
 ## 7. 当前验证结果
 
@@ -129,6 +130,10 @@ python edit.py \
 - Java 后端可以创建任务并保存文件。
 - mock runner 可以生成结果。
 - 前端显示 `Task completed. Result video is ready.`
+- 真实 AutoDL wrapper 已通过 VS Code 端口转发在本地 `http://localhost:8000/health` 返回 `{"status":"ok"}`。
+- Java 真实模式已通过 `PORT=18080 FLOWSTUDIO_MOCK_RUNNER=false AUTODL_BASE_URL=http://localhost:8000` 启动。
+- 前端提交任务后，Java 已进入 AutoDL runner，并打印 `Calling AutoDL: http://localhost:8000/edit`。
+- 通过 `nvitop` 观察到 AutoDL 显存占用，说明链路已进入真实模型推理阶段。
 
 这说明当前已经跑通：
 
