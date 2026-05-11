@@ -9,6 +9,7 @@ public class EditTask {
   private String projectName;
   private String sourcePrompt;
   private String targetPrompt;
+  private String targetWord;
   private TaskStatus status;
   private Path taskDir;
   private Path inputVideoPath;
@@ -54,6 +55,14 @@ public class EditTask {
 
   public void setTargetPrompt(String targetPrompt) {
     this.targetPrompt = targetPrompt;
+  }
+
+  public String getTargetWord() {
+    return targetWord;
+  }
+
+  public void setTargetWord(String targetWord) {
+    this.targetWord = targetWord;
   }
 
   public TaskStatus getStatus() {

@@ -10,6 +10,7 @@ const videoInput = document.querySelector("#video-input");
 const maskInput = document.querySelector("#mask-input");
 const sourcePromptInput = document.querySelector("#source-prompt");
 const targetPromptInput = document.querySelector("#target-prompt");
+const targetWordInput = document.querySelector("#target-word");
 const submitButton = document.querySelector("#submit-task");
 const clearMaskButton = document.querySelector("#clear-mask");
 const formMessage = document.querySelector("#form-message");
@@ -291,6 +292,7 @@ form?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const video = videoInput.files?.[0];
   const targetPrompt = targetPromptInput.value.trim();
+  const targetWord = targetWordInput.value.trim();
 
   if (!video) {
     setMessage("Please select an input video before creating a task.", "error");
@@ -298,6 +300,10 @@ form?.addEventListener("submit", async (event) => {
   }
   if (!targetPrompt) {
     setMessage("Target prompt is required.", "error");
+    return;
+  }
+  if (!targetWord) {
+    setMessage("Target word is required for FlowAnchor editing.", "error");
     return;
   }
   if (!currentMaskBlob) {
@@ -309,6 +315,7 @@ form?.addEventListener("submit", async (event) => {
   formData.append("projectName", projectNameInput.value.trim());
   formData.append("sourcePrompt", sourcePromptInput.value.trim());
   formData.append("targetPrompt", targetPrompt);
+  formData.append("targetWord", targetWord);
   formData.append("video", video, video.name);
   formData.append("mask", currentMaskBlob, currentMaskSource === "uploaded" ? "mask-upload.png" : "mask-bbox.png");
 

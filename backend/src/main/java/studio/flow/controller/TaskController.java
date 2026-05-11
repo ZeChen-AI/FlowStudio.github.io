@@ -34,10 +34,11 @@ public class TaskController {
       @RequestParam(value = "projectName", required = false) String projectName,
       @RequestParam(value = "sourcePrompt", required = false) String sourcePrompt,
       @RequestParam("targetPrompt") String targetPrompt,
+      @RequestParam("targetWord") String targetWord,
       @RequestParam("video") MultipartFile video,
       @RequestParam("mask") MultipartFile mask)
       throws IOException {
-    EditTask task = taskService.createEditTask(projectName, sourcePrompt, targetPrompt, video, mask);
+    EditTask task = taskService.createEditTask(projectName, sourcePrompt, targetPrompt, targetWord, video, mask);
     return TaskResponse.from(task);
   }
 

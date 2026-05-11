@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
+import cv2
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse
 
@@ -23,6 +24,7 @@ def health():
 async def edit(
     taskId: str = Form(...),
     targetPrompt: str = Form(...),
+    targetWord: str = Form(...),
     sourcePrompt: str = Form(""),
     video: UploadFile = File(...),
     mask: UploadFile = File(...),
@@ -30,31 +32,39 @@ async def edit(
     task_dir = TASK_DIR / safe_name(taskId)
     task_dir.mkdir(parents=True, exist_ok=True)
     input_video = task_dir / "input.mp4"
-    input_mask = task_dir / "mask.png"
+    first_frame_mask = task_dir / "first_frame_mask.png"
+    mask_dir = task_dir / "mask_frames"
     output_video = task_dir / "result.mp4"
 
     await save_upload(video, input_video)
-    await save_upload(mask, input_mask)
+    await save_upload(mask, first_frame_mask)
 
     if not EDIT_SCRIPT.exists():
-      return {
-          "success": False,
-          "message": f"edit.py not found at {EDIT_SCRIPT}. Place this wrapper next to edit.py.",
-      }
+        return {
+            "success": False,
+            "message": f"edit.py not found at {EDIT_SCRIPT}. Place this wrapper next to edit.py.",
+        }
+
+    try:
+        frame_count = prepare_static_mask_sequence(input_video, first_frame_mask, mask_dir)
+    except Exception as error:
+        return {"success": False, "message": f"Failed to prepare mask sequence: {error}"}
 
     command = [
         "python",
         str(EDIT_SCRIPT),
-        "--video",
+        "--video_path",
         str(input_video),
-        "--mask",
-        str(input_mask),
-        "--target_prompt",
-        targetPrompt,
-        "--source_prompt",
-        sourcePrompt or "",
-        "--output",
+        "--output_path",
         str(output_video),
+        "--src_prompt",
+        sourcePrompt or "",
+        "--tar_prompt",
+        targetPrompt,
+        "--mask_path",
+        str(mask_dir),
+        "--target_word",
+        targetWord,
     ]
 
     try:
@@ -82,7 +92,7 @@ async def edit(
     return {
         "success": True,
         "resultPath": f"/files/{safe_name(taskId)}/result.mp4",
-        "message": "edit success",
+        "message": f"edit success; prepared {frame_count} mask frames",
     }
 
 
@@ -97,6 +107,36 @@ def files(task_id: str, file_name: str):
 async def save_upload(upload: UploadFile, path: Path):
     with path.open("wb") as handle:
         shutil.copyfileobj(upload.file, handle)
+
+
+def prepare_static_mask_sequence(video_path: Path, mask_path: Path, output_dir: Path) -> int:
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise ValueError(f"Could not open video: {video_path}")
+
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    cap.release()
+
+    if frame_count <= 0 or width <= 0 or height <= 0:
+        raise ValueError("Video metadata is invalid.")
+
+    mask = cv2.imread(str(mask_path), cv2.IMREAD_GRAYSCALE)
+    if mask is None:
+        raise ValueError(f"Could not read mask image: {mask_path}")
+
+    mask = cv2.resize(mask, (width, height), interpolation=cv2.INTER_NEAREST)
+    _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for index in range(frame_count):
+        cv2.imwrite(str(output_dir / f"{index:05d}.png"), mask)
+
+    return frame_count
 
 
 def safe_name(value: Optional[str]) -> str:

@@ -34,7 +34,8 @@ class FlowStudioApplicationTests {
             multipart("/api/tasks/edit")
                 .file(video)
                 .file(mask)
-                .param("targetPrompt", "change the selected area"))
+                .param("targetPrompt", "change the selected area")
+                .param("targetWord", "rose"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errorMessage").value("video file type is not supported."));
   }

@@ -8,5 +8,6 @@ runtime/
 backend/runtime/
 backend/target/
 autodl/runtime/
+FlowAnchor_AutoDL/
 __pycache__/
 *.pyc

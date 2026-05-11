@@ -10,6 +10,7 @@ The studio supports:
 
 - MP4/MOV/WebM video selection and local preview.
 - Optional source prompt and required target prompt.
+- Target word input for FlowAnchor cross-attention modulation.
 - PNG/JPG mask upload.
 - Rectangle mask drawing on the first video frame.
 - Multipart submission to `POST /api/tasks/edit`.
@@ -61,18 +62,24 @@ pip install -r requirements.txt
 python flowstudio_autodl_api.py --host 0.0.0.0 --port 8000
 ```
 
-The wrapper expects `edit.py` to accept:
+The wrapper expects FlowAnchor `edit.py` to accept:
 
 ```bash
-python edit.py --video input.mp4 --mask mask.png --target_prompt "..." --source_prompt "..." --output result.mp4
+python edit.py \
+  --video_path input.mp4 \
+  --output_path result.mp4 \
+  --src_prompt "..." \
+  --tar_prompt "..." \
+  --mask_path mask_frames \
+  --target_word "rose"
 ```
 
-If your real `edit.py` uses different parameter names, only update `autodl/flowstudio_autodl_api.py`; the Java and frontend contract can stay unchanged.
+For the first AutoDL integration pass, the wrapper expands the first-frame mask into a static per-frame mask directory. The later VACE/optical-flow propagation step should replace that mask expansion function without changing the frontend or Java API.
 
 ## API Contract
 
 - `POST /api/tasks/edit`
-  - multipart fields: `projectName?`, `sourcePrompt?`, `targetPrompt`, `video`, `mask`
+  - multipart fields: `projectName?`, `sourcePrompt?`, `targetPrompt`, `targetWord`, `video`, `mask`
   - returns task detail with `taskId` and `status`
 - `GET /api/tasks/{taskId}`
   - returns project info, prompts, status, result URL, and error message

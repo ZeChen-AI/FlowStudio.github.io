@@ -37,10 +37,12 @@ public class TaskService {
       String projectName,
       String sourcePrompt,
       String targetPrompt,
+      String targetWord,
       MultipartFile video,
       MultipartFile mask)
       throws IOException {
     validateText(targetPrompt, "targetPrompt is required.");
+    validateText(targetWord, "targetWord is required.");
     validateFile(video, VIDEO_EXTENSIONS, "video");
     validateFile(mask, MASK_EXTENSIONS, "mask");
 
@@ -52,6 +54,7 @@ public class TaskService {
     task.setProjectName(defaultProjectName(projectName));
     task.setSourcePrompt(nullToEmpty(sourcePrompt));
     task.setTargetPrompt(targetPrompt.trim());
+    task.setTargetWord(targetWord.trim());
     task.setTaskDir(taskDir);
     task.setInputVideoPath(saveMultipart(video, taskDir, "input", VIDEO_EXTENSIONS));
     task.setMaskPath(saveMultipart(mask, taskDir, "mask", MASK_EXTENSIONS));

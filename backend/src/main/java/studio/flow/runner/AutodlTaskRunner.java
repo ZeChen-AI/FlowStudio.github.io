@@ -38,6 +38,7 @@ public class AutodlTaskRunner implements TaskRunner {
     body.add("taskId", task.getTaskId());
     body.add("sourcePrompt", nullToEmpty(task.getSourcePrompt()));
     body.add("targetPrompt", task.getTargetPrompt());
+    body.add("targetWord", task.getTargetWord());
     body.add("video", new FileSystemResource(task.getInputVideoPath()));
     body.add("mask", new FileSystemResource(task.getMaskPath()));
 
