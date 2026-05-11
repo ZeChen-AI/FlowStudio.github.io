@@ -248,3 +248,43 @@ find /root/autodl-tmp/FlowAnchor/runtime/tasks -maxdepth 3 -type f | tail -30
 ```
 
 如果 `nvitop` 出现显存占用，说明已经进入真实模型推理阶段。
+
+## 9. 已验证成功的 baseline
+
+当前已完成一次真实链路成功验证。
+
+成功任务：
+
+```text
+task-a0cad7de
+```
+
+成功现象：
+
+```text
+前端 TASK STATUS = SUCCESS
+Message = edit success; prepared 81 mask frames
+页面可播放结果视频
+页面提供 Download Result
+```
+
+关键日志：
+
+```text
+[FlowStudio] Task task-a0cad7de started runner.
+[FlowStudio] Calling AutoDL: http://127.0.0.1:8000/edit
+[FlowStudio] AutoDL multipart bytes: 227711
+[FlowStudio AutoDL] /edit received taskId=task-a0cad7de, targetWord=rose
+```
+
+这个 baseline 的 mask 策略是：
+
+```text
+第一帧 mask 静态复制到全部 81 帧
+```
+
+下一阶段计划：
+
+```text
+将静态复制替换为 VACE / 光流传播
+```

@@ -173,7 +173,75 @@ mvn spring-boot:run
 
 这样做的原因是先验证 Java 到 AutoDL 的接口、文件传输和参数映射，再处理更复杂的视频 mask 传播问题，避免一次性引入太多不确定性。
 
-## 9. 汇报时可以强调的设计取舍
+## 9. 真实 AutoDL 链路跑通记录
+
+在完成 mock 闭环后，我们进一步接入真实 FlowAnchor AutoDL pipeline，并完成了一次端到端验证。
+
+最终跑通的真实链路是：
+
+```text
+Mac 本地浏览器
+→ Java Spring Boot 后端
+→ VS Code 端口转发 127.0.0.1:8000
+→ AutoDL FastAPI wrapper
+→ FlowAnchor edit.py
+→ GPU 推理
+→ result.mp4
+→ Java 保存结果
+→ 前端 SUCCESS 展示与下载
+```
+
+关键运行配置：
+
+```bash
+# AutoDL VS Code 终端
+cd /root/autodl-tmp/FlowAnchor
+python flowstudio_autodl_api.py --host 0.0.0.0 --port 8000
+```
+
+```bash
+# Mac 本地 Java 后端终端
+cd /Users/chenze/Desktop/FlowStudio/backend
+PORT=18080 FLOWSTUDIO_MOCK_RUNNER=false AUTODL_BASE_URL=http://127.0.0.1:8000 mvn spring-boot:run
+```
+
+本次成功任务的关键日志：
+
+```text
+[FlowStudio] Task task-a0cad7de started runner.
+[FlowStudio] Calling AutoDL: http://127.0.0.1:8000/edit
+[FlowStudio] AutoDL multipart bytes: 227711
+[FlowStudio AutoDL] /edit received taskId=task-a0cad7de, targetWord=rose
+```
+
+前端成功状态：
+
+```text
+TASK STATUS: SUCCESS
+Task ID: task-a0cad7de
+Message: edit success; prepared 81 mask frames
+```
+
+这说明系统已经不只是 mock 演示，而是真实完成了：
+
+```text
+前端输入
+→ Java 编排
+→ AutoDL 模型执行
+→ 结果视频返回
+```
+
+本轮还暴露并解决了几个重要工程问题：
+
+- `localhost` 在某些场景可能优先走 IPv6 或被 VS Code 转发影响，因此 Java 侧改用 `http://127.0.0.1:8000` 调 AutoDL。
+- 8080 / 8090 端口容易被 VS Code 或其他本地服务占用，因此 Java 演示端口改用 `18080`。
+- Spring 默认 multipart 构造在 VS Code 端口转发 + FastAPI 组合下曾出现 422，FastAPI 无法解析 `taskId / video / mask` 等字段。
+- Java AutoDL client 最终改为 JDK `HttpClient` 手工构造 multipart，并强制使用 HTTP/1.1，解决了 FastAPI 收不到字段的问题。
+- AutoDL wrapper 增加入口日志，便于确认请求是否真正到达 `/edit`。
+
+这个阶段的结论是：第一阶段静态 mask 复制方案已经能跑通真实模型，后续 VACE / 光流传播可以作为第二阶段增强，而不是阻塞主链路。
+
+## 10. 汇报时可以强调的设计取舍
 
 本项目不是直接追求复杂平台化，而是优先保证课堂项目可落地、可展示、可解释。
 
